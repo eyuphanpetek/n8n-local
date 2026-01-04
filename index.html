@@ -285,6 +285,55 @@
       text-align: center;
     }
 
+    /* Voice Button */
+    .field-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .voice-btn {
+      background: none;
+      border: none;
+      color: var(--primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 99px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      transition: all 0.2s;
+      margin: 0;
+      width: auto;
+    }
+
+    .voice-btn:hover {
+      background: rgba(79, 70, 229, 0.1);
+    }
+
+    .voice-btn.recording {
+      color: var(--negative);
+      animation: pulse 1.5s infinite;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
     @media (max-width: 768px) {
       .grid-inputs {
         grid-template-columns: 1fr;
@@ -340,8 +389,13 @@
         </div>
       </div>
 
-      <label for="review">Müşteri Deneyimi Mesajı</label>
-      <textarea id="review" placeholder="Müşterinin yorumunu buraya yapıştırın..."></textarea>
+      <div class="field-header">
+        <label for="review" style="margin:0">Müşteri Deneyimi Mesajı</label>
+        <button id="voiceBtn" class="voice-btn" onclick="toggleVoice()">
+          <span id="voiceIcon">🎤</span> <span id="voiceText">Sesle Yaz</span>
+        </button>
+      </div>
+      <textarea id="review" placeholder="Müşterinin yorumunu buraya yapıştırın veya mikrofonu kullanın..."></textarea>
 
       <button id="analyzeBtn" onclick="analyze()">Analizi Başlat</button>
     </div>

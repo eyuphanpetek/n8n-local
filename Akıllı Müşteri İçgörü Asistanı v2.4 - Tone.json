@@ -1,0 +1,373 @@
+{
+    "name": "Akıllı Müşteri İçgörü Asistanı v2.4 - Tone & FAQ",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "f5d4c49e-b8f6-42d4-a019-8e6b6429d313",
+                "responseMode": "responseNode",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Headers",
+                                "value": "Content-Type"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Methods",
+                                "value": "POST, OPTIONS"
+                            }
+                        ]
+                    }
+                }
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                300,
+                240
+            ],
+            "id": "f99b9321-4fce-4661-922c-ee29cf6c021d",
+            "name": "Webhook",
+            "webhookId": "f5d4c49e-b8f6-42d4-a019-8e6b6429d313"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "5d5dce59-1c08-4233-a240-59bf49028241",
+                            "name": "name",
+                            "value": "={{ $json.body.name}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "91514ee0-93cc-4316-9267-61690c9da3a2",
+                            "name": "email",
+                            "value": "={{ $json.body.email}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "f7598411-442d-4d92-9fc9-8ca6b04dbb61",
+                            "name": "review",
+                            "value": "={{ $json.body.review }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "f7598411-442d-4d92-9fc9-8ca6b04dbb62",
+                            "name": "tone",
+                            "value": "={{ $json.body.tone || 'friendly' }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Save Original Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                500,
+                240
+            ],
+            "id": "65ad684a-c08c-487e-8d60-512b797008e7"
+        },
+        {
+            "parameters": {
+                "operation": "read",
+                "documentId": {
+                    "__rl": true,
+                    "value": "1CcQbucGVUjc-KT4O4noLwQ8dTJVdBR8qQ8loJkdWS7I",
+                    "mode": "list"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "gid=0",
+                    "mode": "list"
+                },
+                "filters": {
+                    "conditions": [
+                        {
+                            "id": "7662c19a-3f62-473d-815d-85fbf80e608d",
+                            "leftValue": "Email",
+                            "rightValue": "={{ $node[\"Save Original Data\"].json.email }}",
+                            "operator": "equal"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Lookup History",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4,
+            "position": [
+                700,
+                340
+            ],
+            "id": "e9a0b1c0-d6ef-463d-b37c-961c21bddf8e",
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "wqKil85WMWsXWztO",
+                    "name": "Google Sheets account"
+                }
+            },
+            "alwaysOutputData": true
+        },
+        {
+            "parameters": {
+                "jsCode": "const history = $input.all();\nif (history.length === 0 || !history[0].json.Timestamp) {\n  return [{ json: { history_text: \"Bu müşteri ile ilk temasımız.\" } }];\n}\nconst summary = history.slice(-3).map(h => `- [${h.json.Timestamp}] Duygu: ${h.json.Sentiment}, Yorum: ${h.json.Review}`).join('\\n');\nreturn [{ json: { history_text: \"Müşterinin son 3 yorumu:\\n\" + summary } }];"
+            },
+            "name": "Format History",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                900,
+                340
+            ],
+            "id": "c7a0b1c0-d6ef-463d-b37c-961c21bddf8e"
+        },
+        {
+            "parameters": {
+                "mode": "combine",
+                "combineBy": "combineByPosition",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 3.2,
+            "position": [
+                1100,
+                240
+            ],
+            "id": "f7a0b1c0-d6ef-463d-b37c-961c21bddf8e",
+            "name": "Merge Data"
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.review }}",
+                "hasOutputParser": true,
+                "messages": {
+                    "messageValues": [
+                        {
+                            "type": "HumanMessagePromptTemplate",
+                            "message": "=Sen Türkiye'nin en iyi müşteri deneyimi uzmanısın. \n\nMÜŞTERİ GEÇMİŞİ:\n{{ $json.history_text }}\n\nİstenen Cevap Tonu: {{ $json.tone.toUpperCase() }}\n\nŞu anki yorum:\n{{ $json.review }}\n\nLütfen sadece JSON formatında cevap ver:\n{\n  \"sentiment\": \"positive\" | \"negative\" | \"neutral\" | \"inappropriate\",\n  \"sentiment_score\": 0-100,\n  \"summary\": \"Kısa özet\",\n  \"suggested_reply\": \"Müşteriye {{ $json.tone }} tonda profesyonel bir cevap.\"\n}"
+                        }
+                    ]
+                }
+            },
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.7,
+            "position": [
+                1300,
+                240
+            ],
+            "id": "2d1f0bcb-d6ef-463d-b37c-961c21bddf8e",
+            "name": "Basic LLM Chain"
+        },
+        {
+            "parameters": {
+                "model": "llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.2
+                }
+            },
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1300,
+                420
+            ],
+            "id": "cb25c02a-3e3b-42ad-8239-3a06a8b0a751",
+            "name": "Groq Chat Model",
+            "credentials": {
+                "groqApi": {
+                    "id": "ViSQoNpbR944gxu2",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "let raw = $json.text || $json.choices?.[0]?.message?.content || JSON.stringify($json);\nconst start = raw.indexOf('{');\nconst end = raw.lastIndexOf('}');\nif (start !== -1 && end !== -1 && end > start) raw = raw.substring(start, end + 1);\ntry {\n  const parsed = JSON.parse(raw);\n  return [{ json: { ...$node[\"Merge Data\"].json, ...parsed } }];\n} catch (e) {\n  return [{ json: { ...$node[\"Merge Data\"].json, sentiment: \"neutral\", sentiment_score: 50, summary: \"Hata\", suggested_reply: \"Teknik sorun.\" } }];\n}"
+            },
+            "name": "Final Parser",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1520,
+                240
+            ],
+            "id": "c698b1d0-faeb-4633-9d8c-206853e05439"
+        },
+        {
+            "parameters": {
+                "operation": "appendOrUpdate",
+                "documentId": {
+                    "__rl": true,
+                    "value": "1CcQbucGVUjc-KT4O4noLwQ8dTJVdBR8qQ8loJkdWS7I",
+                    "mode": "list"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "gid=0",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Name": "={{ $json.name }}",
+                        "Timestamp": "={{ new Date().toISOString() }}",
+                        "Email": "={{ $json.email }}",
+                        "Review": "={{ $json.review }}",
+                        "Sentiment": "={{ $json.sentiment }}",
+                        "Score": "={{ $json.sentiment_score }}",
+                        "Summary": "={{ $json.summary }}",
+                        "Suggested_Reply": "={{ $json.suggested_reply }}"
+                    },
+                    "matchingColumns": [
+                        "Timestamp"
+                    ]
+                }
+            },
+            "name": "Final Save",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4,
+            "position": [
+                1740,
+                240
+            ],
+            "id": "597750d0-a7a5-4dc9-9237-68a53f56bc1d",
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "wqKil85WMWsXWztO",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ $json }}",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.4,
+            "position": [
+                1940,
+                240
+            ],
+            "id": "1a82d9f1-b7bd-4d8e-acc3-90172ce7ad87",
+            "name": "Respond to Webhook"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Save Original Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Save Original Data": {
+            "main": [
+                [
+                    {
+                        "node": "Lookup History",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Merge Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Lookup History": {
+            "main": [
+                [
+                    {
+                        "node": "Format History",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format History": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Data",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Merge Data": {
+            "main": [
+                [
+                    {
+                        "node": "Basic LLM Chain",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Basic LLM Chain",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Basic LLM Chain": {
+            "main": [
+                [
+                    {
+                        "node": "Final Parser",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Final Parser": {
+            "main": [
+                [
+                    {
+                        "node": "Final Save",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Final Save": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

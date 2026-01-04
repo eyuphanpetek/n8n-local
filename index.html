@@ -4,123 +4,277 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Akıllı Müşteri İçgörü Asistanı</title>
+  <title>Müşteri Deneyimi Analitik Paneli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #1a73e8;
-      --positive: #0f9d58;
-      --negative: #db4437;
-      --neutral: #f4b400;
-      --warning: #d32f2f;
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --positive: #10b981;
+      --negative: #ef4444;
+      --neutral: #f59e0b;
+      --warning: #dc2626;
+      --bg: #f3f4f6;
+      --card-bg: rgba(255, 255, 255, 0.9);
+      --glass-bg: rgba(255, 255, 255, 0.7);
     }
 
     body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      max-width: 800px;
-      margin: 40px auto;
-      padding: 20px;
-      background: #f8f9fa;
-      color: #333;
-      line-height: 1.6;
+      font-family: 'Outfit', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #eef2ff 0%, #f3f4f6 100%);
+      color: #1f2937;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
     }
 
     h1 {
+      font-weight: 700;
       color: var(--primary);
-      text-align: center;
-      margin-bottom: 8px;
+      margin: 0 0 10px 0;
+      font-size: 2.5rem;
+      letter-spacing: -0.025em;
     }
 
-    p {
+    .subtitle {
+      color: #6b7280;
+      font-size: 1.1rem;
+    }
+
+    /* Stats Dashboard */
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      padding: 24px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
       text-align: center;
-      color: #555;
+      transition: transform 0.3s ease;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-label {
+      color: #6b7280;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin: 5px 0;
+    }
+
+    .stat-trend {
+      font-size: 0.875rem;
+    }
+
+    /* Main Form */
+    .analyzer-card {
+      background: var(--card-bg);
+      padding: 32px;
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.6);
       margin-bottom: 30px;
+    }
+
+    .grid-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
     }
 
     label {
       display: block;
-      margin-top: 16px;
+      margin-bottom: 8px;
       font-weight: 600;
-      color: #444;
+      color: #374151;
+      font-size: 0.95rem;
     }
 
-    input[type="text"],
-    input[type="email"],
+    input,
     textarea {
       width: 100%;
-      padding: 14px;
-      font-size: 16px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
+      padding: 16px;
+      background: #f9fafb;
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 1rem;
+      transition: all 0.2s;
       box-sizing: border-box;
-      margin-top: 8px;
+    }
+
+    input:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
     }
 
     textarea {
-      height: 140px;
+      height: 120px;
       resize: vertical;
     }
 
-    .optional {
-      font-weight: normal;
-      font-size: 0.9em;
-      color: #666;
-    }
-
     button {
-      display: block;
-      margin: 30px auto 0;
-      padding: 14px 36px;
-      font-size: 18px;
-      font-weight: bold;
+      width: 100%;
+      padding: 16px;
       background: var(--primary);
       color: white;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.3s;
+      transition: all 0.2s;
+      margin-top: 10px;
     }
 
     button:hover {
-      background: #0d47a1;
+      background: var(--primary-hover);
+      transform: scale(1.01);
+    }
+
+    button:active {
+      transform: scale(0.99);
     }
 
     button:disabled {
-      background: #999;
+      background: #94a3b8;
       cursor: not-allowed;
+      transform: none;
     }
 
-    .result {
+    /* Results */
+    #result {
       margin-top: 30px;
+      display: none;
+    }
+
+    .result-content {
       padding: 24px;
+      border-radius: 20px;
       background: white;
-      border-radius: 14px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-      opacity: 0;
-      transform: translateY(10px);
-      transition: all 0.4s ease;
+      border: 1px solid #e5e7eb;
+      animation: slideUp 0.4s ease-out;
     }
 
-    .result.visible {
-      opacity: 1;
-      transform: translateY(0);
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
-    .loader {
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 99px;
+      font-weight: 700;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .badge-positive {
+      background: #d1fae5;
+      color: #065f46;
+    }
+
+    .badge-negative {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .badge-neutral {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    .summary-text {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+      color: #111827;
+    }
+
+    .reply-box {
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 16px;
+      border-left: 6px solid var(--primary);
+      position: relative;
+    }
+
+    .copy-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: auto;
+      padding: 6px 12px;
+      font-size: 0.8rem;
+    }
+
+    .inappropriate-alert {
+      background: #fef2f2;
+      border: 2px solid #fee2e2;
+      color: #991b1b;
+      padding: 24px;
+      border-radius: 20px;
       text-align: center;
-      color: var(--primary);
-      font-weight: bold;
-      font-size: 1.1em;
+    }
+
+    /* Loader */
+    .loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+      padding: 40px;
     }
 
     .spinner {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid #f0f0f0;
-      border-top: 3px solid var(--primary);
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(79, 70, 229, 0.1);
+      border-top: 4px solid var(--primary);
       border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-right: 10px;
+      animation: spin 0.8s linear infinite;
     }
 
     @keyframes spin {
@@ -129,78 +283,98 @@
       }
     }
 
-    blockquote {
-      background: #f0f0f0;
-      padding: 18px;
-      border-radius: 10px;
-      margin: 16px 0 0;
-      border-left: 5px solid var(--primary);
-      font-style: normal;
-      line-height: 1.6;
-    }
-
-    .inappropriate-box {
-      background: #ffebee;
-      padding: 20px;
-      border-radius: 12px;
-      border-left: 6px solid var(--warning);
-      text-align: center;
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 15px;
-        margin: 20px auto;
+    @media (max-width: 640px) {
+      .grid-inputs {
+        grid-template-columns: 1fr;
       }
 
-      button {
-        width: 100%;
+      h1 {
+        font-size: 2rem;
       }
     }
   </style>
 </head>
 
 <body>
-  <h1>Akıllı Müşteri İçgörü Asistanı</h1>
-  <p>Müşteri yorumunu yaz, anında duygu analizi + cevap önerisi al!</p>
+  <div class="container">
+    <header>
+      <h1>AI Müşteri Deneyimi</h1>
+      <p class="subtitle">Veri odaklı içgörüler ve anlık eylem planları.</p>
+    </header>
 
-  <label for="name">İsim <span class="optional">(opsiyonel)</span></label>
-  <input type="text" id="name" placeholder="Örn: Ahmet Yılmaz" />
+    <div class="dashboard" id="dashboard">
+      <div class="stat-card">
+        <div class="stat-label">Toplam Analiz</div>
+        <div class="stat-value" id="stat-total">-</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Genel Skor</div>
+        <div class="stat-value" id="stat-avg">-</div>
+        <div class="stat-trend" style="color: var(--positive)">/ 100</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Memnuniyet</div>
+        <div class="stat-value" id="stat-pos">-%</div>
+      </div>
+    </div>
 
-  <label for="email">E-posta <span class="optional">(opsiyonel – size daha iyi yardımcı olmamız için)</span></label>
-  <input type="email" id="email" placeholder="Örn: ahmet@example.com" />
+    <div class="analyzer-card">
+      <div class="grid-inputs">
+        <div>
+          <label for="name">Kullanıcı Adı</label>
+          <input type="text" id="name" placeholder="Müşteri ismi...">
+        </div>
+        <div>
+          <label for="email">E-posta</label>
+          <input type="email" id="email" placeholder="iletisim@örnek.com">
+        </div>
+      </div>
 
-  <label for="review">Müşteri Yorumu</label>
-  <textarea id="review" placeholder="Örn: Siparişim hiç gelmedi, çok sinirliyim..."></textarea>
+      <label for="review">Müşteri Deneyimi Mesajı</label>
+      <textarea id="review" placeholder="Müşterinin yorumunu buraya yapıştırın..."></textarea>
 
-  <button id="analyzeBtn" onclick="analyze()">Analiz Et</button>
+      <button id="analyzeBtn" onclick="analyze()">Analizi Başlat</button>
+    </div>
 
-  <div id="result" class="result"></div>
+    <div id="result"></div>
+  </div>
 
   <script>
-    // --- CONFIGURATION ---
     const N8N_BASE_URL = 'https://f6972d12a25cb5.lhr.life';
-    // ---------------------
+
+    // Sayfa yüklendiğinde istatistikleri çek
+    window.onload = fetchStats;
+
+    async function fetchStats() {
+      try {
+        const res = await fetch(`${N8N_BASE_URL}/webhook/stats`);
+        const data = await res.json();
+        document.getElementById('stat-total').innerText = data.total || 0;
+        document.getElementById('stat-avg').innerText = data.avgScore || 0;
+        document.getElementById('stat-pos').innerText = `${data.positive?.percent || 0}%`;
+      } catch (e) {
+        console.error("Stats error:", e);
+      }
+    }
 
     async function analyze() {
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
       const review = document.getElementById('review').value.trim();
 
-      if (!review) return alert("Lütfen bir müşteri yorumu yazın!");
+      if (!review) return alert("Lütfen bir yorum girin!");
 
-      const resultDiv = document.getElementById('result');
       const btn = document.getElementById('analyzeBtn');
+      const resultDiv = document.getElementById('result');
 
       btn.disabled = true;
+      resultDiv.style.display = 'block';
       resultDiv.innerHTML = `
         <div class="loader">
           <div class="spinner"></div>
-          Analiz ediliyor, lütfen bekleyin...
+          <p>Yapay zeka veriyi işliyor...</p>
         </div>
       `;
-      resultDiv.classList.add('visible');
-      resultDiv.style.display = 'block';
 
       try {
         const res = await fetch(`${N8N_BASE_URL}/webhook/f5d4c49e-b8f6-42d4-a019-8e6b6429d313`, {
@@ -209,57 +383,49 @@
           body: JSON.stringify({ name, email, review })
         });
 
-        const text = await res.text();
-        console.log("n8n Response:", text); // Debugging
+        let data = await res.json();
+        if (Array.isArray(data)) data = data[0];
 
-        if (!text || text.trim() === '' || text.trim() === '{}' || text.trim() === '[]') {
-          throw new Error('Sunucudan boş yanıt alındı. Lütfen n8n workflowunun "Active" olduğundan emin olun.');
-        }
+        const sentiment = (data.Sentiment || data.sentiment || 'neutral').toLowerCase();
+        const score = data.Score || data.sentiment_score || data.score || 0;
+        const summary = data.Summary || data.summary || '';
+        const reply = data.Suggested_Reply || data.suggested_reply || '';
 
-        let data = JSON.parse(text);
-
-        // Handle n8n returning an array
-        if (Array.isArray(data)) {
-          data = data[0] || {};
-        }
-
-        if (data.sentiment === 'inappropriate' || data.Sentiment === 'inappropriate') {
+        if (sentiment === 'inappropriate') {
           resultDiv.innerHTML = `
-            <div class="inappropriate-box">
-              <h3 style="color: var(--warning); margin: 0 0 12px 0;">Uyarı: Uygunsuz İçerik Tespit Edildi</h3>
-              <p style="margin: 0; font-size: 16px;">
-                ${data.suggested_reply || data.Suggested_Reply || 'Mesajınız içerik kurallarımıza uymamaktadır. Lütfen uygun bir şekilde yazınız.'}
-              </p>
+            <div class="inappropriate-alert">
+              <h2>⚠️ Uygunsuz İçerik</h2>
+              <p>${reply || 'Bu mesaj içerik politikalarımıza uymuyor.'}</p>
+            </div>
+          `;
+        } else {
+          resultDiv.innerHTML = `
+            <div class="result-content">
+              <span class="badge badge-${sentiment}">${sentiment} (${score}/100)</span>
+              <div class="summary-text">${summary}</div>
+              <div class="reply-box">
+                <strong>💡 Önerilen Cevap:</strong>
+                <p id="replyText">${reply}</p>
+                <button class="copy-btn" onclick="copyReply()">Kopyala</button>
+              </div>
             </div>
           `;
         }
-        else {
-          const sentiment = (data.sentiment || data.Sentiment || 'neutral').toLowerCase();
-          const color = sentiment === 'positive' ? 'var(--positive)' :
-            sentiment === 'negative' ? 'var(--negative)' : 'var(--neutral)';
 
-          resultDiv.innerHTML = `
-            <h3>Analiz Sonucu</h3>
-            <p><strong>Duygu:</strong>
-              <span style="color:${color}; font-weight:bold; font-size:1.1em;">
-                ${sentiment.toUpperCase()}
-              </span>
-              <strong> (${data.sentiment_score || data.Score || data.score || '?'} / 100)</strong>
-            </p>
-            <p><strong>Özet:</strong> ${data.summary || data.Summary || '—'}</p>
-            <p><strong>Önerilen Cevap:</strong></p>
-            <blockquote style="border-left-color:${color};">
-              ${data.suggested_reply || data.Suggested_Reply || '—'}
-            </blockquote>
-          `;
-        }
+        // Stats'ı güncelle
+        fetchStats();
 
       } catch (err) {
-        resultDiv.innerHTML = `<p style="color: red; font-weight: bold;">Hata: ${err.message}</p>`;
-        console.error("Frontend error:", err);
+        resultDiv.innerHTML = `<div class="inappropriate-alert" style="color:var(--negative)">Hata: ${err.message}</div>`;
       } finally {
         btn.disabled = false;
       }
+    }
+
+    function copyReply() {
+      const text = document.getElementById('replyText').innerText;
+      navigator.clipboard.writeText(text);
+      alert("Cevap panoya kopyalandı!");
     }
   </script>
 </body>

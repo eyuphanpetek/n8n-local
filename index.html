@@ -11,6 +11,7 @@
       --positive: #0f9d58;
       --negative: #db4437;
       --neutral: #f4b400;
+      --warning: #d32f2f;
     }
 
     body {
@@ -35,20 +36,39 @@
       margin-bottom: 30px;
     }
 
+    label {
+      display: block;
+      margin-top: 16px;
+      font-weight: 600;
+      color: #444;
+    }
+
+    input[type="text"],
+    input[type="email"],
     textarea {
       width: 100%;
-      height: 140px;
       padding: 14px;
       font-size: 16px;
       border: 1px solid #ddd;
       border-radius: 10px;
-      resize: vertical;
       box-sizing: border-box;
+      margin-top: 8px;
+    }
+
+    textarea {
+      height: 140px;
+      resize: vertical;
+    }
+
+    .optional {
+      font-weight: normal;
+      font-size: 0.9em;
+      color: #666;
     }
 
     button {
       display: block;
-      margin: 20px auto 0;
+      margin: 30px auto 0;
       padding: 14px 36px;
       font-size: 18px;
       font-weight: bold;
@@ -89,6 +109,7 @@
       text-align: center;
       color: var(--primary);
       font-weight: bold;
+      font-size: 1.1em;
     }
 
     .spinner {
@@ -115,6 +136,15 @@
       margin: 16px 0 0;
       border-left: 5px solid var(--primary);
       font-style: normal;
+      line-height: 1.6;
+    }
+
+    .inappropriate-box {
+      background: #ffebee;
+      padding: 20px;
+      border-radius: 12px;
+      border-left: 6px solid var(--warning);
+      text-align: center;
     }
 
     @media (max-width: 600px) {
@@ -131,30 +161,37 @@
 </head>
 
 <body>
-
   <h1>Akıllı Müşteri İçgörü Asistanı</h1>
   <p>Müşteri yorumunu yaz, anında duygu analizi + cevap önerisi al!</p>
 
+  <label for="name">İsim <span class="optional">(opsiyonel)</span></label>
+  <input type="text" id="name" placeholder="Örn: Ahmet Yılmaz" />
+
+  <label for="email">E-posta <span class="optional">(opsiyonel – size daha iyi yardımcı olmamız için)</span></label>
+  <input type="email" id="email" placeholder="Örn: ahmet@example.com" />
+
+  <label for="review">Müşteri Yorumu</label>
   <textarea id="review" placeholder="Örn: Siparişim hiç gelmedi, çok sinirliyim..."></textarea>
-  <button id="analyzeBtn" onclick="analyze()">Analiz Et →</button>
+
+  <button id="analyzeBtn" onclick="analyze()">Analiz Et</button>
 
   <div id="result" class="result"></div>
 
   <script>
     // --- CONFIGURATION ---
-    // For local: 'http://localhost:5678'
-    // For live: 'https://your-tunnel-url.trycloudflare.com'
     const N8N_BASE_URL = 'https://f6972d12a25cb5.lhr.life';
     // ---------------------
 
     async function analyze() {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
       const review = document.getElementById('review').value.trim();
+
       if (!review) return alert("Lütfen bir müşteri yorumu yazın!");
 
       const resultDiv = document.getElementById('result');
       const btn = document.getElementById('analyzeBtn');
 
-      // UI: Loading
       btn.disabled = true;
       resultDiv.innerHTML = `
         <div class="loader">
@@ -169,7 +206,7 @@
         const res = await fetch(`${N8N_BASE_URL}/webhook/f5d4c49e-b8f6-42d4-a019-8e6b6429d313`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ review })
+          body: JSON.stringify({ name, email, review })
         });
 
         const text = await res.text();
@@ -186,22 +223,36 @@
           data = data[0] || {};
         }
 
-        const sentiment = (data.sentiment || 'neutral').toLowerCase();
-        const color = sentiment === 'positive' ? 'var(--positive)' :
-          sentiment === 'negative' ? 'var(--negative)' : 'var(--neutral)';
+        if (data.sentiment === 'inappropriate') {
+          resultDiv.innerHTML = `
+            <div class="inappropriate-box">
+              <h3 style="color: var(--warning); margin: 0 0 12px 0;">Uyarı: Uygunsuz İçerik Tespit Edildi</h3>
+              <p style="margin: 0; font-size: 16px;">
+                ${data.suggested_reply || 'Mesajınız içerik kurallarımıza uymamaktadır. Lütfen uygun bir şekilde yazınız.'}
+              </p>
+            </div>
+          `;
+        }
+        else {
+          const sentiment = (data.sentiment || 'neutral').toLowerCase();
+          const color = sentiment === 'positive' ? 'var(--positive)' :
+            sentiment === 'negative' ? 'var(--negative)' : 'var(--neutral)';
 
-        resultDiv.innerHTML = `
-          <h3>Analiz Sonucu</h3>
-          <p><strong>Duygu:</strong> 
-            <span style="color:${color}; font-weight:bold;">
-              ${sentiment.toUpperCase()}
-            </span> 
-            (<strong>${data.sentiment_score || data.score || '?'} / 100</strong>)
-          </p>
-          <p><strong>Özet:</strong> ${data.summary || '—'}</p>
-          <p><strong>Önerilen Cevap:</strong></p>
-          <blockquote>${data.suggested_reply || '—'}</blockquote>
-        `;
+          resultDiv.innerHTML = `
+            <h3>Analiz Sonucu</h3>
+            <p><strong>Duygu:</strong> 
+              <span style="color:${color}; font-weight:bold; font-size:1.1em;">
+                ${sentiment.toUpperCase()}
+              </span>
+              <strong> (${data.sentiment_score || data.score || '?'} / 100)</strong>
+            </p>
+            <p><strong>Özet:</strong> ${data.summary || '—'}</p>
+            <p><strong>Önerilen Cevap:</strong></p>
+            <blockquote style="border-left-color:${color};">
+              ${data.suggested_reply || '—'}
+            </blockquote>
+          `;
+        }
 
       } catch (err) {
         resultDiv.innerHTML = `<p style="color: red; font-weight: bold;">Hata: ${err.message}</p>`;

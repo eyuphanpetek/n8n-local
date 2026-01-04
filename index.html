@@ -223,33 +223,33 @@
           data = data[0] || {};
         }
 
-        if (data.sentiment === 'inappropriate') {
+        if (data.sentiment === 'inappropriate' || data.Sentiment === 'inappropriate') {
           resultDiv.innerHTML = `
             <div class="inappropriate-box">
               <h3 style="color: var(--warning); margin: 0 0 12px 0;">Uyarı: Uygunsuz İçerik Tespit Edildi</h3>
               <p style="margin: 0; font-size: 16px;">
-                ${data.suggested_reply || 'Mesajınız içerik kurallarımıza uymamaktadır. Lütfen uygun bir şekilde yazınız.'}
+                ${data.suggested_reply || data.Suggested_Reply || 'Mesajınız içerik kurallarımıza uymamaktadır. Lütfen uygun bir şekilde yazınız.'}
               </p>
             </div>
           `;
         }
         else {
-          const sentiment = (data.sentiment || 'neutral').toLowerCase();
+          const sentiment = (data.sentiment || data.Sentiment || 'neutral').toLowerCase();
           const color = sentiment === 'positive' ? 'var(--positive)' :
             sentiment === 'negative' ? 'var(--negative)' : 'var(--neutral)';
 
           resultDiv.innerHTML = `
             <h3>Analiz Sonucu</h3>
-            <p><strong>Duygu:</strong> 
+            <p><strong>Duygu:</strong>
               <span style="color:${color}; font-weight:bold; font-size:1.1em;">
                 ${sentiment.toUpperCase()}
               </span>
-              <strong> (${data.sentiment_score || data.score || '?'} / 100)</strong>
+              <strong> (${data.sentiment_score || data.Score || data.score || '?'} / 100)</strong>
             </p>
-            <p><strong>Özet:</strong> ${data.summary || '—'}</p>
+            <p><strong>Özet:</strong> ${data.summary || data.Summary || '—'}</p>
             <p><strong>Önerilen Cevap:</strong></p>
             <blockquote style="border-left-color:${color};">
-              ${data.suggested_reply || '—'}
+              ${data.suggested_reply || data.Suggested_Reply || '—'}
             </blockquote>
           `;
         }

@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     :root {
       --primary: #4f46e5;
@@ -107,7 +108,7 @@
 
     .grid-inputs {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr;
       gap: 20px;
       margin-bottom: 20px;
     }
@@ -121,7 +122,8 @@
     }
 
     input,
-    textarea {
+    textarea,
+    select {
       width: 100%;
       padding: 16px;
       background: #f9fafb;
@@ -134,7 +136,8 @@
     }
 
     input:focus,
-    textarea:focus {
+    textarea:focus,
+    select:focus {
       outline: none;
       border-color: var(--primary);
       background: white;
@@ -175,7 +178,7 @@
       transform: none;
     }
 
-    /* Results */
+    /* Results & Skeletons */
     #result {
       margin-top: 30px;
       display: none;
@@ -199,6 +202,29 @@
         opacity: 1;
         transform: translateY(0);
       }
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #f7f7f7 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: loading 1.5s infinite;
+      border-radius: 8px;
+    }
+
+    @keyframes loading {
+      to {
+        background-position: -200% 0;
+      }
+    }
+
+    .skeleton-text {
+      height: 20px;
+      margin-bottom: 10px;
+    }
+
+    .skeleton-box {
+      height: 100px;
+      margin-top: 20px;
     }
 
     .badge {
@@ -259,31 +285,7 @@
       text-align: center;
     }
 
-    /* Loader */
-    .loader {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 15px;
-      padding: 40px;
-    }
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(79, 70, 229, 0.1);
-      border-top: 4px solid var(--primary);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
-
-    @media (max-width: 640px) {
+    @media (max-width: 768px) {
       .grid-inputs {
         grid-template-columns: 1fr;
       }
@@ -328,6 +330,14 @@
           <label for="email">E-posta</label>
           <input type="email" id="email" placeholder="iletisim@örnek.com">
         </div>
+        <div>
+          <label for="tone">Cevap Tonu</label>
+          <select id="tone">
+            <option value="professional">Profesyonel</option>
+            <option value="friendly" selected>Samimi & İçten</option>
+            <option value="formal">Resmi</option>
+          </select>
+        </div>
       </div>
 
       <label for="review">Müşteri Deneyimi Mesajı</label>
@@ -342,7 +352,6 @@
   <script>
     const N8N_BASE_URL = 'https://b48be8c498113d.lhr.life';
 
-    // Sayfa yüklendiğinde istatistikleri çek
     window.onload = fetchStats;
 
     async function fetchStats() {
@@ -360,6 +369,7 @@
     async function analyze() {
       const name = document.getElementById('name').value.trim();
       const email = document.getElementById('email').value.trim();
+      const tone = document.getElementById('tone').value;
       const review = document.getElementById('review').value.trim();
 
       if (!review) return alert("Lütfen bir yorum girin!");
@@ -370,9 +380,10 @@
       btn.disabled = true;
       resultDiv.style.display = 'block';
       resultDiv.innerHTML = `
-        <div class="loader">
-          <div class="spinner"></div>
-          <p>Yapay zeka veriyi işliyor...</p>
+        <div class="result-content">
+          <div class="skeleton-text skeleton" style="width: 30%"></div>
+          <div class="skeleton-text skeleton" style="width: 80%"></div>
+          <div class="skeleton-box skeleton"></div>
         </div>
       `;
 
@@ -380,10 +391,13 @@
         const res = await fetch(`${N8N_BASE_URL}/webhook/f5d4c49e-b8f6-42d4-a019-8e6b6429d313`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, review })
+          body: JSON.stringify({ name, email, tone, review })
         });
 
-        let data = await res.json();
+        const text = await res.text();
+        console.log("n8n Response:", text);
+
+        let data = JSON.parse(text);
         if (Array.isArray(data)) data = data[0];
 
         const sentiment = (data.Sentiment || data.sentiment || 'neutral').toLowerCase();
@@ -410,9 +424,17 @@
               </div>
             </div>
           `;
+
+          if (sentiment === 'positive') {
+            confetti({
+              particleCount: 150,
+              spread: 70,
+              origin: { y: 0.6 },
+              colors: ['#10b981', '#4f46e5', '#f59e0b']
+            });
+          }
         }
 
-        // Stats'ı güncelle
         fetchStats();
 
       } catch (err) {
@@ -425,7 +447,9 @@
     function copyReply() {
       const text = document.getElementById('replyText').innerText;
       navigator.clipboard.writeText(text);
-      alert("Cevap panoya kopyalandı!");
+      const btn = document.querySelector('.copy-btn');
+      btn.innerText = "Kopyalandı!";
+      setTimeout(() => btn.innerText = "Kopyala", 2000);
     }
   </script>
 </body>

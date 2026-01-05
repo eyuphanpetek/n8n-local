@@ -20,8 +20,8 @@ Bu proje, müşteri geri bildirimlerini anlık olarak analiz eden, duygusunu (se
 - **Backend:** [n8n](https://n8n.io/) (Self-hosted Docker).
 - **AI / LLM:** [Groq Cloud](https://groq.com/) (Llama 3.3 70B).
 - **Database:** Google Sheets API.
-- **Tunnel:** localhost.run (SSH Tunneling).
-- **Deployment:** Vercel (Frontend), Local Docker (Backend).
+- **Tunnel:** [ngrok](https://ngrok.com/) (Permanent Static Domain).
+- **Deployment:** [Vercel](https://vercel.com/) (Frontend), Local Docker (Backend).
 
 ## 🚀 Kurulum
 
@@ -41,7 +41,7 @@ n8n içinde aşağıdaki servisler için `Credentials` tanımlamanız gerekmekte
 `index.html` içindeki `N8N_BASE_URL` değişkenini kendi n8n webhook URL'nizle güncelleyin:
 
 ```javascript
-const N8N_BASE_URL = 'https://sizin-tunnel-adresiniz.lhr.life';
+const N8N_BASE_URL = 'https://nonsuppressive-pluggingly-carlota.ngrok-free.dev';
 ```
 
 ### 4. Yayına Alma

@@ -398,6 +398,12 @@
       <textarea id="review" placeholder="Müşterinin yorumunu buraya yapıştırın veya mikrofonu kullanın..."></textarea>
 
       <button id="analyzeBtn" onclick="analyze()">Analizi Başlat</button>
+
+      <!-- Live Voice Preview -->
+      <div id="voicePreview"
+        style="display:none; margin-top:15px; padding:12px; background:rgba(79,70,229,0.05); border-radius:10px; border:1px dashed var(--primary); font-style:italic; color:var(--primary); font-size:0.9rem;">
+        <span style="font-weight:bold">🎙️ Canlı Önizleme:</span> <span id="interimText">...</span>
+      </div>
     </div>
 
     <div id="result"></div>
@@ -432,8 +438,11 @@
       recognition.onstart = () => {
         console.log("Voice recognition started. Listening...");
         const btn = document.getElementById('voiceBtn');
+        const preview = document.getElementById('voicePreview');
         btn.classList.add('recording');
+        preview.style.display = 'block';
         document.getElementById('voiceText').innerText = "Dinleniyor...";
+        document.getElementById('interimText').innerText = "Konuşmaya başlayın...";
       };
 
       recognition.onresult = (event) => {
@@ -441,34 +450,50 @@
         let finalTranscript = '';
 
         for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
+            finalTranscript += transcript;
           } else {
-            interimTranscript += event.results[i][0].transcript;
+            interimTranscript += transcript;
           }
+        }
+
+        if (interimTranscript) {
+          document.getElementById('interimText').innerText = interimTranscript;
         }
 
         if (finalTranscript) {
           const textarea = document.getElementById('review');
-          textarea.value += (textarea.value ? ' ' : '') + finalTranscript;
-          console.log("Final Transcript:", finalTranscript);
+          const space = textarea.value && !textarea.value.endsWith(' ') ? ' ' : '';
+          textarea.value += space + finalTranscript;
+          console.log("Captured:", finalTranscript);
+          document.getElementById('interimText').innerText = "...";
         }
       };
 
       recognition.onend = () => {
         console.log("Voice recognition ended.");
         const btn = document.getElementById('voiceBtn');
+        const preview = document.getElementById('voicePreview');
         btn.classList.remove('recording');
+        setTimeout(() => { preview.style.display = 'none'; }, 2000);
         document.getElementById('voiceText').innerText = "Sesle Yaz";
       };
 
       recognition.onerror = (event) => {
         console.error("Speech Recognition Error:", event.error);
         const btn = document.getElementById('voiceBtn');
+        const preview = document.getElementById('voicePreview');
+
         btn.classList.remove('recording');
+        preview.style.display = 'none';
         document.getElementById('voiceText').innerText = "Hata oluştu";
 
-        if (event.error === 'not-allowed') {
+        if (event.error === 'no-speech') {
+          // No-speech is common, don't alert, just show in preview
+          document.getElementById('voiceText').innerText = "Sessiz Kaldınız";
+          console.warn("No speech was detected within the timeout period.");
+        } else if (event.error === 'not-allowed') {
           alert("Mikrofon izni engellenmiş. Lütfen tarayıcı adres çubuğundaki kilit simgesine tıklayıp mikrofona izin verin.");
         } else if (event.error === 'network') {
           alert("İnternet bağlantısı sorunu veya Google servislerine erişilemiyor.");

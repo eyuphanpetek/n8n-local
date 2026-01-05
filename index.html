@@ -503,7 +503,9 @@
 
     async function fetchStats() {
       try {
-        const res = await fetch(`${N8N_BASE_URL}/webhook/stats`);
+        const res = await fetch(`${N8N_BASE_URL}/webhook/stats`, {
+          headers: { 'ngrok-skip-browser-warning': 'true' }
+        });
         const data = await res.json();
         document.getElementById('stat-total').innerText = data.total || 0;
         document.getElementById('stat-avg').innerText = data.avgScore || 0;
@@ -537,7 +539,10 @@
       try {
         const res = await fetch(`${N8N_BASE_URL}/webhook/f5d4c49e-b8f6-42d4-a019-8e6b6429d313`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': 'true'
+          },
           body: JSON.stringify({ name, email, tone, review })
         });
 

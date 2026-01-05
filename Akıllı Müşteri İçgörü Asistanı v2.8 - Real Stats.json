@@ -1,0 +1,671 @@
+{
+    "name": "Akıllı Müşteri İçgörü Asistanı v2.8 - Real Stats",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "f5d4c49e-b8f6-42d4-a019-8e6b6429d313",
+                "responseMode": "responseNode",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Headers",
+                                "value": "Content-Type, ngrok-skip-browser-warning"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Methods",
+                                "value": "POST, OPTIONS"
+                            }
+                        ]
+                    }
+                }
+            },
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2.1,
+            "position": [
+                200,
+                240
+            ],
+            "id": "webhook_main",
+            "name": "Webhook",
+            "webhookId": "f5d4c49e-b8f6-42d4-a019-8e6b6429d313"
+        },
+        {
+            "parameters": {
+                "httpMethod": "GET",
+                "path": "stats",
+                "responseMode": "responseNode",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Headers",
+                                "value": "Content-Type, ngrok-skip-browser-warning"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Stats Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                200,
+                580
+            ],
+            "id": "webhook_stats",
+            "webhookId": "stats"
+        },
+        {
+            "parameters": {
+                "operation": "read",
+                "documentId": {
+                    "__rl": true,
+                    "value": "1CcQbucGVUjc-KT4O4noLwQ8dTJVdBR8qQ8loJkdWS7I",
+                    "mode": "list"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "gid=0",
+                    "mode": "list"
+                },
+                "options": {}
+            },
+            "id": "gs_read_all",
+            "name": "Read All Rows",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4.5,
+            "position": [
+                420,
+                580
+            ],
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "wqKil85WMWsXWztO",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "const items = $input.all();\nconst total = items.length;\n\nif (total === 0) {\n  return [{ json: { total: 0, avgScore: 0, positive: { percent: 0 } } }];\n}\n\nlet sumScore = 0;\nlet posCount = 0;\n\nitems.forEach(item => {\n  const row = item.json;\n  const score = parseInt(row.Score) || 0;\n  sumScore += score;\n  if (row.Sentiment === 'positive') {\n    posCount++;\n  }\n});\n\nreturn [{\n  json: {\n    total: total,\n    avgScore: Math.round(sumScore / total),\n    positive: {\n      percent: Math.round((posCount / total) * 100)\n    }\n  }\n}];"
+            },
+            "id": "code_aggregator",
+            "name": "Calculate Stats",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                640,
+                580
+            ]
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ $json }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Stats",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                860,
+                580
+            ],
+            "id": "respond_stats"
+        },
+        {
+            "parameters": {
+                "httpMethod": "OPTIONS",
+                "path": "f5d4c49e-b8f6-42d4-a019-8e6b6429d313",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Preflight Options",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                200,
+                80
+            ],
+            "id": "preflight_main",
+            "webhookId": "f5d4c49e-b8f6-42d4-a019-8e6b6429d313"
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "OK",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Headers",
+                                "value": "Content-Type, ngrok-skip-browser-warning"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Methods",
+                                "value": "POST, OPTIONS"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Preflight",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                420,
+                80
+            ],
+            "id": "respond_preflight"
+        },
+        {
+            "parameters": {
+                "httpMethod": "OPTIONS",
+                "path": "stats",
+                "responseMode": "responseNode",
+                "options": {}
+            },
+            "name": "Preflight Stats Options",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 2,
+            "position": [
+                200,
+                750
+            ],
+            "id": "preflight_stats",
+            "webhookId": "stats"
+        },
+        {
+            "parameters": {
+                "respondWith": "text",
+                "responseBody": "OK",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Headers",
+                                "value": "Content-Type, ngrok-skip-browser-warning"
+                            },
+                            {
+                                "name": "Access-Control-Allow-Methods",
+                                "value": "GET, OPTIONS"
+                            }
+                        ]
+                    }
+                }
+            },
+            "name": "Respond Stats Preflight",
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1,
+            "position": [
+                420,
+                750
+            ],
+            "id": "respond_stats_preflight"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "name_map",
+                            "name": "name",
+                            "value": "={{ $json.body.name}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "email_map",
+                            "name": "email",
+                            "value": "={{ $json.body.email}}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "review_map",
+                            "name": "review",
+                            "value": "={{ $json.body.review }}",
+                            "type": "string"
+                        },
+                        {
+                            "id": "tone_map",
+                            "name": "tone",
+                            "value": "={{ $json.body.tone || 'friendly' }}",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Save Original Data",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                420,
+                240
+            ],
+            "id": "set_orig"
+        },
+        {
+            "parameters": {
+                "assignments": {
+                    "assignments": [
+                        {
+                            "id": "faq_content",
+                            "name": "faq",
+                            "value": "Şirket Bilgileri:\n- Adres: Teknoloji Plaza, İstanbul\n- Çalışma: 09:00-18:00\n- İade: 14 gün\n- Garanti: 2 yıl\n- Kargo: 500 TL üzeri ücretsiz\n- Destek: Youtube 'Kurulum Rehberi'",
+                            "type": "string"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Knowledge Base (FAQ)",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 3.4,
+            "position": [
+                640,
+                100
+            ],
+            "id": "set_faq"
+        },
+        {
+            "parameters": {
+                "operation": "read",
+                "documentId": {
+                    "__rl": true,
+                    "value": "1CcQbucGVUjc-KT4O4noLwQ8dTJVdBR8qQ8loJkdWS7I",
+                    "mode": "list"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "gid=0",
+                    "mode": "list"
+                },
+                "filters": {
+                    "conditions": [
+                        {
+                            "id": "email_filter",
+                            "leftValue": "Email",
+                            "rightValue": "={{ $node[\"Save Original Data\"].json.email }}",
+                            "operator": "equal"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "name": "Lookup History",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4,
+            "position": [
+                640,
+                340
+            ],
+            "id": "gs_lookup",
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "wqKil85WMWsXWztO",
+                    "name": "Google Sheets account"
+                }
+            },
+            "alwaysOutputData": true
+        },
+        {
+            "parameters": {
+                "jsCode": "const history = $input.all();\nif (history.length === 0 || !history[0].json.Timestamp) {\n  return [{ json: { history_text: \"İlk temas.\" } }];\n}\nconst summary = history.slice(-3).map(h => `- [${h.json.Timestamp}] Duygu: ${h.json.Sentiment}, Yorum: ${h.json.Review}`).join('\\n');\nreturn [{ json: { history_text: \"Son 3 yorum:\\n\" + summary } }];"
+            },
+            "name": "Format History",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                860,
+                340
+            ],
+            "id": "code_history"
+        },
+        {
+            "parameters": {
+                "mode": "combine",
+                "combineBy": "combineByPosition",
+                "options": {}
+            },
+            "type": "n8n-nodes-base.merge",
+            "typeVersion": 3.2,
+            "position": [
+                1080,
+                240
+            ],
+            "id": "merge_all",
+            "name": "Merge Data"
+        },
+        {
+            "parameters": {
+                "promptType": "define",
+                "text": "={{ $json.review }}",
+                "hasOutputParser": true,
+                "messages": {
+                    "messageValues": [
+                        {
+                            "type": "HumanMessagePromptTemplate",
+                            "message": "=Sen Türkiye'nin en bilgili müşteri asistanısın. \n\nŞİRKET BİLGİLERİ (FAQ):\n{{ $json.faq }}\n\nMÜŞTERİ GEÇMİŞİ:\n{{ $json.history_text }}\n\nİstenen Cevap Tonu: {{ $json.tone.toUpperCase() }}\n\nMüşteri Yorumu:\n{{ $json.review }}\n\nLütfen sadece JSON formatında cevap ver:\n{\n  \"sentiment\": \"positive\" | \"negative\" | \"neutral\" | \"inappropriate\",\n  \"sentiment_score\": 0-100,\n  \"summary\": \"Özet\",\n  \"suggested_reply\": \"Cevap (Yukarıdaki FAQ bilgilerini kullanarak net cevap ver.)\"\n}"
+                        }
+                    ]
+                }
+            },
+            "type": "@n8n/n8n-nodes-langchain.chainLlm",
+            "typeVersion": 1.7,
+            "position": [
+                1300,
+                240
+            ],
+            "id": "llm_chain",
+            "name": "Basic LLM Chain"
+        },
+        {
+            "parameters": {
+                "model": "llama-3.3-70b-versatile",
+                "options": {
+                    "temperature": 0.2
+                }
+            },
+            "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+            "typeVersion": 1,
+            "position": [
+                1300,
+                420
+            ],
+            "id": "groq_model",
+            "name": "Groq Chat Model",
+            "credentials": {
+                "groqApi": {
+                    "id": "ViSQoNpbR944gxu2",
+                    "name": "Groq account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "jsCode": "let raw = $json.text || $json.choices?.[0]?.message?.content || JSON.stringify($json);\nconst start = raw.indexOf('{');\nconst end = raw.lastIndexOf('}');\nif (start !== -1 && end !== -1 && end > start) raw = raw.substring(start, end + 1);\ntry {\n  const parsed = JSON.parse(raw);\n  return [{ json: { ...$node[\"Merge Data\"].json, ...parsed } }];\n} catch (e) {\n  return [{ json: { ...$node[\"Merge Data\"].json, sentiment: \"neutral\", sentiment_score: 50, summary: \"Hata\", suggested_reply: \"Teknik sorun.\" } }];\n}"
+            },
+            "name": "Final Parser",
+            "type": "n8n-nodes-base.code",
+            "typeVersion": 2,
+            "position": [
+                1520,
+                240
+            ],
+            "id": "code_parse"
+        },
+        {
+            "parameters": {
+                "operation": "appendOrUpdate",
+                "documentId": {
+                    "__rl": true,
+                    "value": "1CcQbucGVUjc-KT4O4noLwQ8dTJVdBR8qQ8loJkdWS7I",
+                    "mode": "list"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "gid=0",
+                    "mode": "list"
+                },
+                "columns": {
+                    "mappingMode": "defineBelow",
+                    "value": {
+                        "Name": "={{ $json.name }}",
+                        "Timestamp": "={{ new Date().toISOString() }}",
+                        "Email": "={{ $json.email }}",
+                        "Review": "={{ $json.review }}",
+                        "Sentiment": "={{ $json.sentiment }}",
+                        "Score": "={{ $json.sentiment_score }}",
+                        "Summary": "={{ $json.summary }}",
+                        "Suggested_Reply": "={{ $json.suggested_reply }}"
+                    },
+                    "matchingColumns": [
+                        "Timestamp"
+                    ]
+                }
+            },
+            "name": "Final Save",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4,
+            "position": [
+                1740,
+                240
+            ],
+            "id": "gs_save",
+            "credentials": {
+                "googleSheetsOAuth2Api": {
+                    "id": "wqKil85WMWsXWztO",
+                    "name": "Google Sheets account"
+                }
+            }
+        },
+        {
+            "parameters": {
+                "respondWith": "json",
+                "responseBody": "={{ $json }}",
+                "options": {
+                    "responseHeaders": {
+                        "entries": [
+                            {
+                                "name": "Access-Control-Allow-Origin",
+                                "value": "*"
+                            }
+                        ]
+                    }
+                }
+            },
+            "type": "n8n-nodes-base.respondToWebhook",
+            "typeVersion": 1.4,
+            "position": [
+                1960,
+                240
+            ],
+            "id": "respond_main",
+            "name": "Respond to Webhook"
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Save Original Data",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Stats Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Read All Rows",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Read All Rows": {
+            "main": [
+                [
+                    {
+                        "node": "Calculate Stats",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Calculate Stats": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Stats",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Preflight Options": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Preflight",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Preflight Stats Options": {
+            "main": [
+                [
+                    {
+                        "node": "Respond Stats Preflight",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Save Original Data": {
+            "main": [
+                [
+                    {
+                        "node": "Lookup History",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Merge Data",
+                        "type": "main",
+                        "index": 0
+                    },
+                    {
+                        "node": "Knowledge Base (FAQ)",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Knowledge Base (FAQ)": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Data",
+                        "type": "main",
+                        "index": 2
+                    }
+                ]
+            ]
+        },
+        "Lookup History": {
+            "main": [
+                [
+                    {
+                        "node": "Format History",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Format History": {
+            "main": [
+                [
+                    {
+                        "node": "Merge Data",
+                        "type": "main",
+                        "index": 1
+                    }
+                ]
+            ]
+        },
+        "Merge Data": {
+            "main": [
+                [
+                    {
+                        "node": "Basic LLM Chain",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Groq Chat Model": {
+            "ai_languageModel": [
+                [
+                    {
+                        "node": "Basic LLM Chain",
+                        "type": "ai_languageModel",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Basic LLM Chain": {
+            "main": [
+                [
+                    {
+                        "node": "Final Parser",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Final Parser": {
+            "main": [
+                [
+                    {
+                        "node": "Final Save",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Final Save": {
+            "main": [
+                [
+                    {
+                        "node": "Respond to Webhook",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    }
+}

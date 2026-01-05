@@ -1,4 +1,4 @@
-# 🤖 Akıllı Müşteri İçgörü Asistanı (v2.6)
+# 🤖 Akıllı Müşteri İçgörü Asistanı (v2.8)
 
 Bu proje, müşteri geri bildirimlerini anlık olarak analiz eden, duygusunu (sentiment) ölçen, geçmiş müşteri etkileşimlerini kontrol eden ve kurumsal bilgi bankasına (RAG) dayanarak profesyonel yanıtlar üreten yapay zeka destekli bir otomasyon sistemidir.
 
@@ -11,7 +11,7 @@ Bu proje, müşteri geri bildirimlerini anlık olarak analiz eden, duygusunu (se
 - **📚 Bilgi Bankası (RAG):** n8n içinde gömülü FAQ sayesinde şirket kurallarına ve ürün bilgilerine dayalı doğru cevaplar.
 - **🕒 Müşteri Geçmişi:** Google Sheets entegrasyonu ile müşterinin geçmiş yorumlarını hatırlayan "bağlamsal" zeka.
 - **🎭 Ton Seçimi:** Cevapların "Profesyonel", "Samimi" veya "Resmi" tonda üretilmesini sağlama.
-- **🎤 Sesle Yazma:** Web Speech API ile mikrofon kullanarak sesli geri bildirim girişi.
+- **🎤 Gelişmiş Sesle Yazma:** Canlı önizleme, hata yönetimi ve Türkçe dil desteği ile sesli geri bildirim girişi.
 - **🎨 Premium UI:** Modern Glassmorphism tasarımı, Skeleton Loader ve Konfeti kutlamaları.
 
 ## 🛠️ Teknoloji Yığını
@@ -27,7 +27,7 @@ Bu proje, müşteri geri bildirimlerini anlık olarak analiz eden, duygusunu (se
 
 ### 1. n8n Kurulumu
 
-Projedeki son sürüm olan `.json` dosyasını (`Akıllı Müşteri İçgörü Asistanı v2.6.json`) indirin ve n8n arayüzünden **Import** edin.
+Projedeki son sürüm olan `.json` dosyasını (`Akıllı Müşteri İçgörü Asistanı v2.8 - Real Stats.json`) indirin ve n8n arayüzünden **Import** edin.
 
 ### 2. Kimlik Bilgileri
 
@@ -53,7 +53,7 @@ GitHub reponuzu Vercel'e bağlayarak frontend kısmını saniyeler içinde yayı
 ```text
 ├── index.html          # Ana Dashboard ve Kullanıcı Arayüzü
 ├── bilgi_bankasi.md    # AI için referans dökümanı
-├── workflows/          # n8n Workflow JSON dosyaları (v1.0 - v2.6)
+├── workflows/          # n8n Workflow JSON dosyaları (v1.0 - v2.8)
 └── README.md           # Proje dökümantasyonu
 ```
 
